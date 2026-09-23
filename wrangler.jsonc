@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "tanstackstarter-template",
+  "main": "src/server.ts",
+  "compatibility_date": "2026-09-22",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "observability": {
+    "enabled": true,
+  },
+  // Bind a custom domain when the site goes live, e.g.:
+  // "routes": [{ "pattern": "www.example.com", "custom_domain": true }],
+}

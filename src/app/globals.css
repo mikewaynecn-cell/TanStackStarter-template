@@ -1,0 +1,743 @@
+@import "tailwindcss";
+
+/* ---------- Design tokens ----------
+   Light is the default; the header toggle adds the .dark class on <html>
+   (persisted in localStorage under "site-theme", applied before first
+   paint by the inline boot script in src/routes/__root.tsx). Theme swap
+   is token-only — components stay untouched. */
+:root {
+  color-scheme: light;
+  --ink: #1a2333;
+  --ink-soft: #5a6b80;
+  --paper: #f5f6f8;
+  --paper-deep: #eaecf0;
+  --surface: #fdfdfe;
+  --surface-strong: #f8f9fb;
+  --line: #c3cad3;
+  --signal: #1d5fd6;
+  --signal-dark: #1749a8;
+  --signal-pale: #e3ecfb;
+  --deep: #16324f;
+  --deep-ink: #0d1b2e;
+  --radius-card: 12px;
+  --mono:
+    ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+  --sans:
+    system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.dark {
+  color-scheme: dark;
+  --paper: #0d121c;
+  --paper-deep: #131a27;
+  --surface: #161e2b;
+  --surface-strong: #121926;
+  --line: #3a4757;
+  --ink: #e3e9f1;
+  --ink-soft: #9aa8b8;
+  --signal: #6ea8fe;
+  --signal-dark: #8db8ff;
+  --signal-pale: #17253d;
+  --deep: #1e3a5f;
+  --deep-ink: #080f1a;
+}
+
+/* Brighter signal + ink text keeps the primary CTA readable in dark. */
+.dark .button--primary {
+  color: #0d121c;
+}
+
+.dark .button--primary:hover {
+  background: #8db8ff;
+}
+
+::selection {
+  background: var(--signal-pale);
+  color: var(--ink);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--paper);
+  scroll-behavior: smooth;
+  /* Sticky header is ~71px tall (desktop) — anchor jumps must land below. */
+  scroll-padding-top: 86px;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 4px;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+h1 {
+  font-size: clamp(2.4rem, 5.5vw, 4rem);
+}
+
+h2 {
+  font-size: clamp(1.7rem, 3.5vw, 2.6rem);
+}
+
+.shell {
+  width: min(1080px, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+.narrow-column {
+  width: min(760px, 100%);
+  margin: 0 auto;
+}
+
+.section-space {
+  padding: 90px 0;
+}
+
+.eyebrow {
+  color: var(--ink-soft);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.17em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.eyebrow--accent {
+  color: var(--signal-dark);
+}
+
+.body-copy,
+.page-lede,
+.hero-lede {
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+
+.button {
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  font-weight: 700;
+  gap: 10px;
+  justify-content: center;
+  letter-spacing: 0.03em;
+  min-height: 44px;
+  padding: 0 18px;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+}
+
+.button--primary {
+  background: var(--signal);
+  color: #fff;
+}
+
+.button--primary:hover {
+  background: var(--signal-dark);
+}
+
+.dark .button--primary:hover {
+  color: #0d121c;
+}
+
+.button--quiet {
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--ink-soft);
+}
+
+.button--quiet:hover {
+  border-color: var(--signal);
+  color: var(--signal-dark);
+}
+
+.text-link-inline {
+  color: var(--signal-dark);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.inline-code,
+code {
+  font-family: var(--mono);
+  font-size: 0.92em;
+}
+
+.source-note {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  color: var(--ink-soft);
+  font-size: 0.86rem;
+  line-height: 1.7;
+  margin: 30px 0 0;
+  padding: 16px 18px;
+}
+
+.source-note a {
+  color: var(--signal-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---------- Header ---------- */
+
+.site-header {
+  background: var(--surface-strong);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.header-inner {
+  align-items: center;
+  display: flex;
+  gap: 32px;
+  min-height: 70px;
+}
+
+.wordmark {
+  align-items: center;
+  color: var(--ink);
+  display: inline-flex;
+  font-size: 1.02rem;
+  font-weight: 700;
+  gap: 10px;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.wordmark-mark {
+  display: block;
+  flex: 0 0 32px;
+  height: 32px;
+  width: 32px;
+}
+
+/* Wordmark link inherits its context color; the mark itself is constant. */
+
+.desktop-nav {
+  display: flex;
+  flex: 1;
+  gap: 28px;
+  justify-content: flex-end;
+}
+
+.desktop-nav a {
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.desktop-nav a:hover {
+  color: var(--signal-dark);
+}
+
+/* Language + theme travel as one right-aligned control pair. */
+.header-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.mobile-nav {
+  display: none;
+  position: relative;
+}
+
+.mobile-nav-toggle {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  display: inline-flex;
+  height: 38px;
+  justify-content: center;
+  transition:
+    border-color 160ms ease,
+    color 160ms ease;
+  width: 38px;
+}
+
+.mobile-nav-toggle:hover {
+  border-color: var(--signal);
+  color: var(--signal-dark);
+}
+
+.mobile-nav-toggle svg {
+  fill: none;
+  height: 19px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 1.8;
+  width: 19px;
+}
+
+.mobile-nav-panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  min-width: 220px;
+  padding: 6px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  z-index: 30;
+}
+
+.mobile-nav-panel a {
+  border-radius: 8px;
+  color: var(--ink-soft);
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 650;
+  padding: 10px 12px;
+}
+
+.mobile-nav-panel a:hover,
+.mobile-nav-panel a[data-status="active"] {
+  background: var(--paper-deep);
+  color: var(--signal-dark);
+}
+
+.theme-toggle {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 38px;
+  height: 38px;
+  justify-content: center;
+  transition:
+    border-color 160ms ease,
+    color 160ms ease;
+  width: 38px;
+}
+
+.theme-toggle:hover {
+  border-color: var(--signal);
+  color: var(--signal-dark);
+}
+
+.theme-toggle svg {
+  display: block;
+  height: 17px;
+  width: 17px;
+}
+
+/* ---------- Language switcher ----------
+   Same quiet square as the theme toggle; menu rows are flat (no shadow,
+   border only). Disabled locales stay visible as a "soon" row. */
+.lang-switch {
+  position: relative;
+}
+
+.lang-button {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 46px;
+  height: 38px;
+  justify-content: center;
+  transition:
+    border-color 160ms ease,
+    color 160ms ease;
+  width: 46px;
+}
+
+.lang-button:hover {
+  border-color: var(--signal);
+}
+
+.lang-badge {
+  color: var(--ink);
+  display: block;
+  height: 14px;
+  width: 22px;
+}
+
+.lang-menu {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  min-width: 198px;
+  padding: 6px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  z-index: 30;
+}
+
+.lang-menu__item {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  display: flex;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  gap: 11px;
+  padding: 10px 11px;
+  text-align: left;
+  width: 100%;
+}
+
+.lang-menu__item:hover {
+  background: var(--paper-deep);
+  color: var(--ink);
+}
+
+.lang-menu__item--active,
+.lang-menu__item--active:hover {
+  color: var(--signal-dark);
+}
+
+.lang-menu__item[aria-disabled="true"] {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.lang-menu__item[aria-disabled="true"]:hover {
+  background: transparent;
+  color: var(--ink-soft);
+}
+
+.lang-check {
+  color: var(--signal-dark);
+  font-size: 0.85rem;
+  margin-left: auto;
+}
+
+.lang-soon {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink-soft);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  margin-left: auto;
+  padding: 2px 8px;
+  text-transform: uppercase;
+}
+
+/* ---------- Footer ----------
+   Dark band in both themes; text constants are paper-tinted. */
+.site-footer {
+  background: var(--deep-ink);
+  border-top: 1px solid var(--line);
+  color: #f0f3f7;
+  padding: 60px 0 22px;
+}
+
+.footer-grid {
+  display: grid;
+  gap: 50px;
+  grid-template-columns: 1fr 1fr;
+  padding-bottom: 54px;
+}
+
+.footer-wordmark {
+  color: #f0f3f7;
+}
+
+.footer-note {
+  color: #c6cedb;
+  font-size: 0.9rem;
+  margin: 18px 0 0;
+  max-width: 320px;
+}
+
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footer-links a {
+  color: #dbe1ea;
+  font-size: 0.85rem;
+}
+
+.footer-links a:hover {
+  color: #fff;
+}
+
+.footer-bottom {
+  border-top: 1px solid rgb(240 243 247 / 16%);
+  color: #9ba5b5;
+  display: flex;
+  font-size: 0.68rem;
+  justify-content: space-between;
+  letter-spacing: 0.08em;
+  padding-top: 20px;
+  text-transform: uppercase;
+}
+
+/* ---------- Home hero + feature grid ---------- */
+
+.hero-section {
+  padding: 44px 0 88px;
+}
+
+.hero-section h1 {
+  margin: 12px 0 16px;
+  max-width: 720px;
+}
+
+.hero-lede {
+  margin-bottom: 26px;
+  max-width: 620px;
+}
+
+.section-tint {
+  background: var(--paper-deep);
+}
+
+.section-tint h2 {
+  margin: 14px 0 22px;
+}
+
+.feature-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+
+.feature-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  padding: 20px;
+}
+
+.feature-card h3 {
+  font-size: 1rem;
+  margin: 0 0 8px;
+}
+
+.feature-card p {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ---------- Shared FAQ ---------- */
+
+.faq-list {
+  border-bottom: 1px solid var(--line);
+}
+
+.faq-item {
+  border-top: 1px solid var(--line);
+}
+
+.faq-item summary {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  font-weight: 600;
+  gap: 16px;
+  justify-content: space-between;
+  list-style: none;
+  padding: 20px 0;
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item summary::after {
+  color: var(--signal-dark);
+  content: "+";
+  flex: 0 0 auto;
+  font-size: 1.4rem;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.faq-item[open] summary::after {
+  content: "−";
+}
+
+.faq-answer {
+  color: var(--ink-soft);
+  font-size: 0.98rem;
+  line-height: 1.8;
+  margin: 0 0 22px;
+  max-width: 660px;
+}
+
+/* ---------- Generic page hero ---------- */
+
+.page-hero {
+  padding-bottom: 110px;
+  padding-top: 100px;
+}
+
+.page-hero h1 {
+  margin: 18px 0 26px;
+  max-width: 720px;
+}
+
+.page-lede {
+  margin-bottom: 10px;
+}
+
+.prose-copy .body-copy {
+  margin-top: 22px;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 700px) {
+  .shell {
+    width: min(100% - 32px, 1080px);
+  }
+
+  .section-space {
+    padding: 64px 0;
+  }
+
+  .header-inner {
+    gap: 16px;
+    min-height: 60px;
+  }
+
+  .wordmark {
+    font-size: 0.92rem;
+  }
+
+  .wordmark-mark {
+    flex-basis: 28px;
+    height: 28px;
+    width: 28px;
+  }
+
+  /* The full navigation moves into an accessible compact menu on phones. */
+  .desktop-nav {
+    display: none;
+  }
+
+  .mobile-nav {
+    display: block;
+  }
+
+  /* Language + theme grouped at the right edge: logo owns the left,
+     controls pair up right. */
+  .header-controls {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  .lang-button,
+  .theme-toggle,
+  .mobile-nav-toggle {
+    flex-basis: 44px;
+    height: 44px;
+    margin-left: 0;
+    width: 44px;
+  }
+
+  .hero-section {
+    padding: 32px 0 64px;
+  }
+
+  .footer-grid {
+    gap: 36px;
+    grid-template-columns: 1fr;
+    padding-bottom: 36px;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .page-hero {
+    padding-bottom: 80px;
+    padding-top: 72px;
+  }
+}
+
+@media (max-width: 370px) {
+  .site-header .wordmark > span {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}

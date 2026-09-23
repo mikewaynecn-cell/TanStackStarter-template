@@ -1,0 +1,7 @@
+dist/
+node_modules/
+.wrangler/
+LICENSE
+src/routeTree.gen.ts
+public/*.ico
+public/*.png

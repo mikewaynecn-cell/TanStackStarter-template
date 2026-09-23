@@ -1,0 +1,27 @@
+node_modules/
+dist/
+dist-ssr/
+build/
+coverage/
+*.log
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+!.gitkeep
+
+# TanStack Start / Cloudflare Workers
+.next/
+.open-next/
+.tanstack/
+.output/
+.wrangler/
+.dev.vars*
+!.dev.vars.example
+*.cpuprofile
+
+# Local editor and OS files
+.DS_Store
+.idea/
+.vscode/
+.zcode/
