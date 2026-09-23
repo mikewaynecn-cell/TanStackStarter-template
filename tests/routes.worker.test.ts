@@ -121,8 +121,43 @@ describe("public HTTP routes", () => {
 
     expect(enResponse.status).toBe(404);
     expect(en).toContain("This page took a wrong turn.");
+    expect(en).toContain("<title>Page not found | Starter Site</title>");
+    expect(en).toContain('name="robots" content="noindex, follow"');
     expect(zhResponse.status).toBe(404);
     expect(zh).toContain("这个页面走丢了。");
+    expect(zh).toContain("<title>页面不存在 | Starter Site</title>");
+  });
+
+  it("replaces the framework error panel with a noindexed localized error page", async () => {
+    const [enResponse, zhResponse] = await Promise.all([
+      appFetch(`${ORIGIN}/error-demo/`),
+      appFetch(`${ORIGIN}/zh/error-demo/`),
+    ]);
+    const en = await enResponse.text();
+    const zh = await zhResponse.text();
+
+    // Loader failures respond 500 with the localized error page in the
+    // body — before this template wired defaultErrorComponent, a crashing
+    // route served TanStack Router's built-in "Something went wrong!"
+    // panel here instead.
+    expect(enResponse.status).toBe(500);
+    expect(en).toContain("This page hit a snag.");
+    expect(en).toContain("Try again");
+    // The robots meta must land in <head> (React 19 hoists it there).
+    expect(en.slice(0, en.indexOf("</head>"))).toContain(
+      'name="robots" content="noindex, follow"',
+    );
+    expect(en).toContain("<title>Something went wrong | Starter Site</title>");
+    expect(en).not.toContain("Something went wrong!");
+    expect(en).not.toContain("Show Error");
+
+    expect(zhResponse.status).toBe(500);
+    expect(zh).toContain("页面出了点问题。");
+    expect(zh).toContain("重试");
+    expect(zh).toContain("<title>页面出错了 | Starter Site</title>");
+    expect(zh.slice(0, zh.indexOf("</head>"))).toContain(
+      'name="robots" content="noindex, follow"',
+    );
   });
 
   it("rejects locale prefixes that are not enabled", async () => {

@@ -12,10 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LocaleRouteImport } from './routes/$locale'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as ErrorDemoRouteImport } from './routes/error-demo'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as LocaleIndexRouteImport } from './routes/$locale/index'
 import { Route as LocaleAboutRouteImport } from './routes/$locale/about'
+import { Route as LocaleErrorDemoRouteImport } from './routes/$locale/error-demo'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -30,6 +32,11 @@ const LocaleRoute = LocaleRouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ErrorDemoRoute = ErrorDemoRouteImport.update({
+  id: '/error-demo',
+  path: '/error-demo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
@@ -52,22 +59,31 @@ const LocaleAboutRoute = LocaleAboutRouteImport.update({
   path: '/about',
   getParentRoute: () => LocaleRoute,
 } as any)
+const LocaleErrorDemoRoute = LocaleErrorDemoRouteImport.update({
+  id: '/error-demo',
+  path: '/error-demo',
+  getParentRoute: () => LocaleRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$locale': typeof LocaleRouteWithChildren
   '/about': typeof AboutRoute
+  '/error-demo': typeof ErrorDemoRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/$locale/about': typeof LocaleAboutRoute
+  '/$locale/error-demo': typeof LocaleErrorDemoRoute
   '/$locale/': typeof LocaleIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/error-demo': typeof ErrorDemoRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/$locale/about': typeof LocaleAboutRoute
+  '/$locale/error-demo': typeof LocaleErrorDemoRoute
   '/$locale': typeof LocaleIndexRoute
 }
 export interface FileRoutesById {
@@ -75,9 +91,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$locale': typeof LocaleRouteWithChildren
   '/about': typeof AboutRoute
+  '/error-demo': typeof ErrorDemoRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/$locale/about': typeof LocaleAboutRoute
+  '/$locale/error-demo': typeof LocaleErrorDemoRoute
   '/$locale/': typeof LocaleIndexRoute
 }
 export interface FileRouteTypes {
@@ -86,26 +104,32 @@ export interface FileRouteTypes {
     | '/'
     | '/$locale'
     | '/about'
+    | '/error-demo'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/$locale/about'
+    | '/$locale/error-demo'
     | '/$locale/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
+    | '/error-demo'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/$locale/about'
+    | '/$locale/error-demo'
     | '/$locale'
   id:
     | '__root__'
     | '/'
     | '/$locale'
     | '/about'
+    | '/error-demo'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/$locale/about'
+    | '/$locale/error-demo'
     | '/$locale/'
   fileRoutesById: FileRoutesById
 }
@@ -113,6 +137,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LocaleRoute: typeof LocaleRouteWithChildren
   AboutRoute: typeof AboutRoute
+  ErrorDemoRoute: typeof ErrorDemoRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
 }
@@ -138,6 +163,13 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/error-demo': {
+      id: '/error-demo'
+      path: '/error-demo'
+      fullPath: '/error-demo'
+      preLoaderRoute: typeof ErrorDemoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/robots.txt': {
@@ -168,16 +200,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LocaleAboutRouteImport
       parentRoute: typeof LocaleRoute
     }
+    '/$locale/error-demo': {
+      id: '/$locale/error-demo'
+      path: '/error-demo'
+      fullPath: '/$locale/error-demo'
+      preLoaderRoute: typeof LocaleErrorDemoRouteImport
+      parentRoute: typeof LocaleRoute
+    }
   }
 }
 
 interface LocaleRouteChildren {
   LocaleAboutRoute: typeof LocaleAboutRoute
+  LocaleErrorDemoRoute: typeof LocaleErrorDemoRoute
   LocaleIndexRoute: typeof LocaleIndexRoute
 }
 
 const LocaleRouteChildren: LocaleRouteChildren = {
   LocaleAboutRoute: LocaleAboutRoute,
+  LocaleErrorDemoRoute: LocaleErrorDemoRoute,
   LocaleIndexRoute: LocaleIndexRoute,
 }
 
@@ -188,6 +229,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LocaleRoute: LocaleRouteWithChildren,
   AboutRoute: AboutRoute,
+  ErrorDemoRoute: ErrorDemoRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
 }

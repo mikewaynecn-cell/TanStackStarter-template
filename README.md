@@ -68,7 +68,7 @@ npm run dev               # http://localhost:3000
 │   ├── app/globals.css   # 设计令牌（明/暗两套）+ 站点骨架样式（Tailwind 可叠加）
 │   ├── components/
 │   │   ├── seo/json-ld.tsx       # JSON-LD 注入组件
-│   │   └── site/                 # 页头、页脚、语言切换、主题切换
+│   │   └── site/                 # 页头、页脚、语言切换、主题切换、全局错误页
 │   ├── lib/
 │   │   ├── i18n.ts       # 语言注册表、路径派生、hreflang、chrome 词典（i18n 单一事实来源）
 │   │   ├── site.ts       # 站点名、URL、联系方式、规范域名
@@ -76,12 +76,12 @@ npm run dev               # http://localhost:3000
 │   │   └── seo/head.ts   # 每页 meta 辅助（OG/Twitter/canonical/hreflang）
 │   ├── pages/            # 页面内容组件 + 按语言文案字典
 │   ├── routes/           # TanStack file routes
-│   │   ├── __root.tsx    # 文档外壳（html lang、主题启动脚本、404）
+│   │   ├── __root.tsx    # 文档外壳（html lang、主题启动脚本、404/错误页 noindex 头）
 │   │   ├── index.tsx / about.tsx        # 默认语言页面
 │   │   ├── $locale.tsx   # 非默认语言布局门（校验前缀，未启用即 404）
-│   │   ├── $locale/      # 非默认语言页面（index、about）
-│   │   └── robots[.]txt.ts / sitemap[.]xml.ts   # 服务端路由
-│   ├── router.tsx        # 路由器配置
+│   │   ├── $locale/      # 非默认语言页面（index、about、error-demo）
+│   │   └── robots[.]txt.ts / sitemap[.]xml.ts / error-demo.tsx   # 服务端路由 + 错误页演示
+│   ├── router.tsx        # 路由器配置（defaultErrorComponent → 全局错误页）
 │   ├── server.ts         # Worker 入口：安全响应头、HSTS、301/308 跳转
 │   └── styles.css        # 样式入口
 └── tests/                # 单测 + Worker 路由测试
@@ -141,10 +141,11 @@ npm run deploy         # vite build + wrangler deploy
 ## 测试说明
 
 - **单元测试**（`tests/*.unit.test.ts`）：i18n 路径派生 / hreflang、跳转纯函数，node 环境直接跑
-- **Worker 路由测试**（`tests/routes.worker.test.ts`）：先 `vite build`，再用 `@cloudflare/vitest-plugin` 在真实 Worker 运行时里请求构建产物，覆盖双语言页面渲染、canonical/hreflang、308 跳转、安全响应头、robots/sitemap、双语言 404、未启用前缀拒绝
+- **Worker 路由测试**（`tests/routes.worker.test.ts`）：先 `vite build`，再用 `@cloudflare/vitest-plugin` 在真实 Worker 运行时里请求构建产物，覆盖双语言页面渲染、canonical/hreflang、308 跳转、安全响应头、robots/sitemap、双语言 404（含 noindex 与本地化标题）、全局错误页（HTTP 500 + noindex + 本地化文案）、未启用前缀拒绝
 
 ## 已知注意事项
 
+- **错误页/404 的 SEO 行为**：全局错误页挂在 `router.tsx` 的 `defaultErrorComponent`（`src/components/site/error-page.tsx`），不能只配在根路由上——loader 抛错时 SSR 由出错的那一层 match 渲染 errorComponent。loader 抛错 → HTTP 500 + SSR 输出本地化错误页（`noindex`）；组件渲染期抛错 → React SSR 无法在服务端渲染错误边界 fallback，首屏 HTML 为空壳、水合后才显示错误页并补 `noindex`。404 与 loader 错误的 `noindex` + 本地化标题由 `__root.tsx` 的 `head()` 依据 match 状态输出。`/error-demo/`、`/zh/error-demo/` 用于预览与回归测试，正式建站时连同对应 worker 测试一起删除即可
 - 依赖版本已由 `package-lock.json` 固化；本机 npm ≤ 10.9 直接解析本套依赖可能触发 Arborist 的 `edgesOut` 崩溃，保留 lockfile 安装即可避开
 - `src/routeTree.gen.ts` 为生成文件（已加入 lint/format 忽略），不要手改
 

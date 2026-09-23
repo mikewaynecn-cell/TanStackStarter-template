@@ -120,6 +120,13 @@ const EN_STRINGS = {
   notFoundLede:
     "The address you tried to open does not exist. Head back home and start again.",
   notFoundCta: "Back to home",
+  notFoundMetaTitle: "Page not found",
+  errorEyebrow: "Error / page failed to load",
+  errorTitle: "This page hit a snag.",
+  errorLede:
+    "An unexpected error interrupted this page. Trying again usually fixes it; if the problem persists, head back home.",
+  errorRetry: "Try again",
+  errorMetaTitle: "Something went wrong",
 } as const;
 
 /** String-widened shape of EN_STRINGS: locale dictionaries fill the same
@@ -144,6 +151,13 @@ const ZH_STRINGS: ChromeStrings = {
   notFoundTitle: "这个页面走丢了。",
   notFoundLede: "你访问的地址不存在。返回首页重新开始吧。",
   notFoundCta: "返回首页",
+  notFoundMetaTitle: "页面不存在",
+  errorEyebrow: "错误 / 页面加载失败",
+  errorTitle: "页面出了点问题。",
+  errorLede:
+    "页面被一个意外错误中断了。重试通常可以解决；若问题持续，请返回首页。",
+  errorRetry: "重试",
+  errorMetaTitle: "页面出错了",
 };
 
 const STRINGS: Record<Locale, ChromeStrings> = {

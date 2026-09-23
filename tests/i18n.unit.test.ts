@@ -86,4 +86,11 @@ describe("t", () => {
     expect(t("zh").navHome).toBe("首页");
     expect(t("zh").notFoundCta).toBe("返回首页");
   });
+
+  it("carries the global error page copy in every locale", () => {
+    expect(t("en").errorRetry).toBe("Try again");
+    expect(t("zh").errorRetry).toBe("重试");
+    expect(t("zh").errorTitle).toBe("页面出了点问题。");
+    expect(t("zh").errorMetaTitle).toBe("页面出错了");
+  });
 });

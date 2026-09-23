@@ -201,6 +201,14 @@ h2 {
   color: var(--signal-dark);
 }
 
+/* Button row under hero/404/error ledes (home, NotFoundPage, GlobalErrorPage). */
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 30px;
+}
+
 .text-link-inline {
   color: var(--signal-dark);
   text-decoration: underline;

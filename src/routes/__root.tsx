@@ -33,20 +33,47 @@ const organizationJsonLd = {
 };
 
 export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: `${SITE_NAME} — ${SITE_NAME_ALT}` },
-      { name: "description", content: SITE_DESCRIPTION },
-      { name: "robots", content: "index, follow" },
-      { name: "theme-color", content: "#f5f6f8" },
-    ],
-    links: [
-      { rel: "icon", href: SITE_ICON_PATH, type: "image/svg+xml" },
-      { rel: "stylesheet", href: appCss },
-    ],
-  }),
+  head: ({ matches }) => {
+    // 404s and loader failures are visible on the match records, so the
+    // document head can flag them before anything renders: crawlers get
+    // noindex plus a real localized title instead of the site default.
+    // (Render-time crashes never surface here — React SSR bails those
+    // subtrees to client rendering, where GlobalErrorPage adds noindex.)
+    const isNotFound = matches.some((m) => m._notFound);
+    const isError = !isNotFound && matches.some((m) => m.status === "error");
+    const strings = t(
+      localeFromPath(matches[matches.length - 1]?.pathname ?? "/"),
+    );
+
+    const title = isNotFound
+      ? `${strings.notFoundMetaTitle} | ${SITE_NAME}`
+      : isError
+        ? `${strings.errorMetaTitle} | ${SITE_NAME}`
+        : `${SITE_NAME} — ${SITE_NAME_ALT}`;
+    const description = isNotFound
+      ? strings.notFoundLede
+      : isError
+        ? strings.errorLede
+        : SITE_DESCRIPTION;
+
+    return {
+      meta: [
+        { charSet: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { title },
+        { name: "description", content: description },
+        {
+          name: "robots",
+          content: isNotFound || isError ? "noindex, follow" : "index, follow",
+        },
+        { name: "theme-color", content: "#f5f6f8" },
+      ],
+      links: [
+        { rel: "icon", href: SITE_ICON_PATH, type: "image/svg+xml" },
+        { rel: "stylesheet", href: appCss },
+      ],
+    };
+  },
   notFoundComponent: NotFoundPage,
   shellComponent: RootDocument,
 });
